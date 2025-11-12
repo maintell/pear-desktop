@@ -45,7 +45,6 @@ jobs:
 
 
       - name: Build and release on Windows
-        if: startsWith(matrix.os, 'windows') && (github.repository == 'pear-devs/pear-desktop' && github.event_name != 'pull_request')
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
