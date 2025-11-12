@@ -4,6 +4,7 @@ on:
   push:
     branches: [ master ]
   pull_request:
+  workflow_dispatch:  # 支持手动触发
 
 env:
   NODE_VERSION: "22.x"
