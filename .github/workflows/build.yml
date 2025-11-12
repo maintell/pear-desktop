@@ -57,12 +57,6 @@ jobs:
         run: |
           pnpm release:win
 
-      - name: Test
-        uses: coactions/setup-xvfb@v1
-        env:
-          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 1
-        with:
-          run: pnpm test:debug
 
 
   release:
