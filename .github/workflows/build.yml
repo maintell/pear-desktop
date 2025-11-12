@@ -4,7 +4,6 @@ on:
   push:
     branches: [ master ]
   pull_request:
-  workflow_dispatch:
 
 env:
   NODE_VERSION: "22.x"
@@ -13,11 +12,14 @@ jobs:
   build:
     if: github.event.pull_request.draft == false
     name: Build Pear Desktop
-    runs-on: windows-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: true
+      matrix:
+        os: [ windows-latest ]
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v5
+      - uses: actions/checkout@v5
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
@@ -25,20 +27,30 @@ jobs:
           version: 10
           run_install: false
 
-      - name: Setup Node.js
+      - name: Setup NodeJS
+        if: startsWith(matrix.os, 'macOS') != true
         uses: actions/setup-node@v5
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
 
+      - name: Setup NodeJS for macOS
+        if: startsWith(matrix.os, 'macOS')
+        uses: actions/setup-node@v5
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build project
-        run: pnpm build
 
-      - name: Package (Windows)
-        run: pnpm release:win
+      - name: Build and release on Windows
+        if: startsWith(matrix.os, 'windows') && (github.repository == 'pear-devs/pear-desktop' && github.event_name != 'pull_request')
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          pnpm release:win
+
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
